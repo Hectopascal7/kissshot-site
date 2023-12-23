@@ -11,4 +11,6 @@ public interface SystemConfigMapper extends BaseMapper<SystemConfig> {
     @Select("select * from system_config where configName = #{configName}")
     SystemConfig getSystemConfigByConfigName(@Param("configName") String configName);
 
+    @Select("select configValue from system_config where configName = #{configName}")
+    String getSystemConfigValueByConfigName(String configName);
 }

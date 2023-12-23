@@ -10,6 +10,22 @@
     <url>https://www.kissshot.com.cn</url>
     <packaging>pom</packaging>
 
+    <modules>
+        <module>kissshot-job</module>
+        <module>kissshot-log</module>
+        <module>kissshot-util</module>
+        <module>kissshot-action</module>
+        <module>kissshot-service</module>
+        <module>kissshot-config</module>
+        <module>kissshot-mapper</module>
+        <module>kissshot-mail</module>
+        <module>kissshot-mq</module>
+        <module>kissshot-pojo</module>
+        <module>kissshot-api</module>
+        <module>kissshot-entity</module>
+        <module>kissshot-dependency</module>
+    </modules>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -21,6 +37,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>cn.com.kissshot</groupId>
+                <artifactId>kissshot-dependency</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- Spring Dependencies -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -47,14 +71,5 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <modules>
-        <module>kissshot-job</module>
-        <module>kissshot-log</module>
-        <module>kissshot-util</module>
-        <module>kissshot-action</module>
-        <module>kissshot-service</module>
-        <module>kissshot-config</module>
-    </modules>
 
 </project>

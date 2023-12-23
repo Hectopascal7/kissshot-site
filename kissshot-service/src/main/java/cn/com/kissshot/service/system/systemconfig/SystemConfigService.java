@@ -19,4 +19,9 @@ public class SystemConfigService extends ServiceImpl<SystemConfigMapper, SystemC
     public SystemConfig getSystemConfigByConfigName(String configName) {
         return systemConfigMapper.getSystemConfigByConfigName(configName);
     }
+
+    @Override
+    public String getSystemConfigValueByConfigName(String configName) {
+        return systemConfigMapper.getSystemConfigValueByConfigName(configName);
+    }
 }
