@@ -40,7 +40,7 @@ public class BilibiliMagicMarketGoodsQueryJob {
 
     private final Logger logger = LoggerFactory.getLogger(BilibiliMagicMarketGoodsQueryJob.class);
 
-    @Scheduled(cron = "10 58 00 ? * *")
+    @Scheduled(cron = "00 27 16 ? * *")
     public void executeQuery() {
         logger.info("==========哔哩哔哩市集商品获取作业开始！==========");
         String url = iSystemConfigService.getSystemConfigValueByConfigName("Bilibili市集商品列表接口地址");
@@ -94,7 +94,7 @@ public class BilibiliMagicMarketGoodsQueryJob {
                         logger.error("错误！空数据，dataArr为空！");
                     }
                     if (StringUtils.isNotBlank(nextId)) {
-                        int mSeconds = 3000 + (int) (Math.random() * (5000 - 3000 + 1));
+                        int mSeconds = 5000 + (int) (Math.random() * (6000 - 5000 + 1));
                         try {
                             Thread.sleep(mSeconds);
                         } catch (InterruptedException e) {

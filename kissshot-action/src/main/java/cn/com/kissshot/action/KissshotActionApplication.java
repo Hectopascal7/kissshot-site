@@ -4,8 +4,8 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "cn.com.kissshot")
 @MapperScan("cn.com.kissshot.mapper")
+@SpringBootApplication(scanBasePackages = "cn.com.kissshot")
 public class KissshotActionApplication {
 
     public static void main(String[] args) {

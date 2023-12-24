@@ -5,8 +5,9 @@ import cn.com.kissshot.entity.bilibili.magicmarket.good.BilibiliMagicMarketGood;
 import cn.com.kissshot.mapper.bilibili.magicmarket.good.BilibiliMagicMarketGoodMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class BilibiliMagicMarketGoodService extends ServiceImpl<BilibiliMagicMarketGoodMapper, BilibiliMagicMarketGood> implements IBilibiliMagicMarketGoodService {
@@ -17,6 +18,11 @@ public class BilibiliMagicMarketGoodService extends ServiceImpl<BilibiliMagicMar
     @Override
     public Integer getMaxBatch(String date) {
         return marketGoodMapper.getMaxBatch(date);
+    }
+
+    @Override
+    public List<BilibiliMagicMarketGood> getMagicMarketGoodsList() {
+        return marketGoodMapper.getMagicMarketGoodsList();
     }
 
 }

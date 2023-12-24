@@ -11,18 +11,25 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>kissshot-job</module>
-        <module>kissshot-log</module>
-        <module>kissshot-util</module>
         <module>kissshot-action</module>
-        <module>kissshot-service</module>
-        <module>kissshot-config</module>
-        <module>kissshot-mapper</module>
-        <module>kissshot-mail</module>
-        <module>kissshot-mq</module>
+        <module>kissshot-entity</module>
         <module>kissshot-pojo</module>
         <module>kissshot-api</module>
-        <module>kissshot-entity</module>
+        <module>kissshot-service</module>
+        <module>kissshot-mapper</module>
+
+        <module>kissshot-config</module>
+        <module>kissshot-util</module>
+
+        <module>kissshot-job</module>
+        <module>kissshot-rest</module>
+
+        <module>kissshot-mq</module>
+        <module>kissshot-mail</module>
+        <module>kissshot-sms</module>
+
+        <module>kissshot-log</module>
+
         <module>kissshot-dependency</module>
     </modules>
 

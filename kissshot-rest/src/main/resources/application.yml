@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:mysql://sh-cynosdbmysql-grp-ikgzmmre.sql.tencentcdb.com:27310/kissshot-data?userSSL=true
+    username: root
+    password: BlUeRaIn01199700@@
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
