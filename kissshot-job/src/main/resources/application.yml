@@ -6,3 +6,12 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
+logging:
+  file:
+    name: logs/bilibili/magic_market_goods.log
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS
+server:
+  servlet:
+    context-path: /kissshot-job
+  port: 9999
