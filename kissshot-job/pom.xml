@@ -41,13 +41,19 @@
 
         <dependency>
             <groupId>cn.com.kissshot</groupId>
-            <artifactId>kissshot-api</artifactId>
+            <artifactId>kissshot-service</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>cn.com.kissshot</groupId>
-            <artifactId>kissshot-service</artifactId>
+            <artifactId>kissshot-mq</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.kissshot</groupId>
+            <artifactId>kissshot-mail</artifactId>
             <version>1.0.0</version>
         </dependency>
 

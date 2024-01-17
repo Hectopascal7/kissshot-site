@@ -1,9 +1,13 @@
 package cn.com.kissshot.job.bilibili;
 
-import cn.com.kissshot.api.bilibili.magicmarket.good.IBilibiliMagicMarketGoodService;
+import cn.com.kissshot.api.bilibili.magicmarket.goods.IBilibiliMagicMarketGoodsService;
+import cn.com.kissshot.api.bilibili.magicmarket.rule.IBilibiliMagicMarketRuleService;
 import cn.com.kissshot.api.system.systemconfig.ISystemConfigService;
-import cn.com.kissshot.entity.bilibili.magicmarket.good.BilibiliMagicMarketGood;
+import cn.com.kissshot.entity.bilibili.magicmarket.goods.BilibiliMagicMarketGoods;
+import cn.com.kissshot.entity.bilibili.magicmarket.rule.BilibiliMagicMarketRule;
 import cn.com.kissshot.entity.system.systemconfig.SystemConfig;
+import cn.com.kissshot.mail.service.IMailService;
+import cn.com.kissshot.mq.rocketmq.service.IRocketMQService;
 import cn.com.kissshot.util.date.KissshotDateUtil;
 import cn.com.kissshot.util.date.constant.KissshotDateConstant;
 import com.alibaba.fastjson2.JSON;
@@ -34,12 +38,23 @@ public class BilibiliMagicMarketGoodsQueryJob {
     public RestTemplate restTemplate;
 
     @Autowired
-    public IBilibiliMagicMarketGoodService iBilibiliMagicMarketGoodService;
+    public IBilibiliMagicMarketGoodsService iBilibiliMagicMarketGoodsService;
+
+    @Autowired
+    public IBilibiliMagicMarketRuleService iBilibiliMagicMarketRuleService;
+
+    @Autowired
+    public IRocketMQService iRocketMQService;
+
+    @Autowired
+    public IMailService iMailService;
 
     @Autowired
     public ISystemConfigService iSystemConfigService;
 
     private final Logger logger = LoggerFactory.getLogger(BilibiliMagicMarketGoodsQueryJob.class);
+
+    private List<BilibiliMagicMarketRule> bilibiliMagicMarketRuleList = new ArrayList<>();
 
     /**
      * 每3小时执行1次，0时、12时全量执行，其余时间只搜索前1000条
@@ -47,6 +62,7 @@ public class BilibiliMagicMarketGoodsQueryJob {
     @Scheduled(cron = "00 00 0/4 ? * *")
     public void executeQuery() {
         logger.info("==========哔哩哔哩市集商品获取作业开始！==========");
+        bilibiliMagicMarketRuleList = iBilibiliMagicMarketRuleService.getEnabledRuleList();
         String url = iSystemConfigService.getSystemConfigValueByConfigName("Bilibili市集商品列表接口地址");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,7 +75,7 @@ public class BilibiliMagicMarketGoodsQueryJob {
         cookieList.add(cookie);
         headers.put("Cookie", cookieList);
         // 获取批次号
-        Integer batch = iBilibiliMagicMarketGoodService.getMaxBatch(KissshotDateUtil.convertDateToString(new Date(), KissshotDateConstant.YYYY_MM_DD));
+        Integer batch = iBilibiliMagicMarketGoodsService.getMaxBatch(KissshotDateUtil.convertDateToString(new Date(), KissshotDateConstant.YYYY_MM_DD));
         LocalDateTime now = LocalDateTime.now();
         int hour = now.getHour();
         int sign = 100;
@@ -97,7 +113,6 @@ public class BilibiliMagicMarketGoodsQueryJob {
         sign--;
 
         if (null != rtnObj) {
-            logger.info("[返回值]:" + rtnObj.toJSONString());
             Integer code = rtnObj.getInteger("code");
             if (null != code && code == 0) {
                 JSONObject data = rtnObj.getJSONObject("data");
@@ -108,6 +123,7 @@ public class BilibiliMagicMarketGoodsQueryJob {
                         analyzeFigures(dataArr, batch);
                     } else {
                         logger.error("错误！空数据，dataArr为空！");
+                        logger.info("[返回值]:" + rtnObj.toJSONString());
                     }
                     // 非首次调用，nextId不为空才可以继续调用
                     if (StringUtils.isNotBlank(nextId)) {
@@ -140,58 +156,72 @@ public class BilibiliMagicMarketGoodsQueryJob {
         for (int i = 0; i < dataArr.size(); i++) {
             JSONObject figure = dataArr.getJSONObject(i);
             if (null != figure) {
-                BilibiliMagicMarketGood magicMarketGood = new BilibiliMagicMarketGood();
+                BilibiliMagicMarketGoods magicMarketGoods = new BilibiliMagicMarketGoods();
                 Long c2cItemsId = figure.getLong("c2cItemsId");
-                magicMarketGood.setC2cItemsId(c2cItemsId);
+                magicMarketGoods.setC2cItemsId(c2cItemsId);
                 Integer type = figure.getInteger("type");
-                magicMarketGood.setType(type);
+                magicMarketGoods.setType(type);
                 String c2cItemsName = StringUtils.trim(figure.getString("c2cItemsName"));
-                magicMarketGood.setC2cItemsName(c2cItemsName);
+                magicMarketGoods.setC2cItemsName(c2cItemsName);
                 JSONArray detailDtoList = figure.getJSONArray("detailDtoList");
                 JSONObject detail = detailDtoList.getJSONObject(0);
                 Long blindBoxId = detail.getLong("blindBoxId");
-                magicMarketGood.setBlindBoxId(blindBoxId);
+                magicMarketGoods.setBlindBoxId(blindBoxId);
                 Long itemsId = detail.getLong("itemsId");
-                magicMarketGood.setItemsId(itemsId);
+                magicMarketGoods.setItemsId(itemsId);
                 Long skuId = detail.getLong("skuId");
-                magicMarketGood.setSkuId(skuId);
+                magicMarketGoods.setSkuId(skuId);
                 String name = StringUtils.trim(detail.getString("name"));
-                magicMarketGood.setName(name);
+                magicMarketGoods.setName(name);
                 String img = detail.getString("img");
-                magicMarketGood.setImg(img);
+                magicMarketGoods.setImg(img);
                 Long marketPrice = detail.getLong("marketPrice");
-                magicMarketGood.setMarketPrice(marketPrice);
+                magicMarketGoods.setMarketPrice(marketPrice);
                 Integer goodType = detail.getInteger("type");
-                magicMarketGood.setGoodType(goodType);
+                magicMarketGoods.setGoodType(goodType);
                 Boolean isHidden = detail.getBoolean("isHidden");
                 if (isHidden) {
-                    magicMarketGood.setIsHidden(1);
+                    magicMarketGoods.setIsHidden(1);
                 } else {
-                    magicMarketGood.setIsHidden(0);
+                    magicMarketGoods.setIsHidden(0);
                 }
                 Integer totalItemsCount = figure.getInteger("totalItemsCount");
-                magicMarketGood.setTotalItemsCount(totalItemsCount);
+                magicMarketGoods.setTotalItemsCount(totalItemsCount);
                 Long price = figure.getLong("price");
-                magicMarketGood.setPrice(price);
+                magicMarketGoods.setPrice(price);
                 Double showPrice = Double.valueOf(figure.getString("showPrice"));
-                magicMarketGood.setShowPrice(showPrice);
+                magicMarketGoods.setShowPrice(showPrice);
                 String uid = figure.getString("uid");
-                magicMarketGood.setUid(uid);
+                magicMarketGoods.setUid(uid);
                 Integer paymentTime = figure.getInteger("paymentTime");
-                magicMarketGood.setPaymentTime(paymentTime);
+                magicMarketGoods.setPaymentTime(paymentTime);
                 Boolean isMyPublish = figure.getBoolean("isMyPublish");
                 if (isMyPublish) {
-                    magicMarketGood.setIsMyPublish(1);
+                    magicMarketGoods.setIsMyPublish(1);
                 } else {
-                    magicMarketGood.setIsMyPublish(0);
+                    magicMarketGoods.setIsMyPublish(0);
                 }
                 String uname = figure.getString("uname");
-                magicMarketGood.setUname(uname);
+                magicMarketGoods.setUname(uname);
                 String uface = figure.getString("uface");
-                magicMarketGood.setUface(uface);
-                magicMarketGood.setInsertTime(new Date());
-                magicMarketGood.setBatch(batch + 1);
-                iBilibiliMagicMarketGoodService.save(magicMarketGood);
+                magicMarketGoods.setUface(uface);
+                magicMarketGoods.setInsertTime(new Date());
+                magicMarketGoods.setBatch(batch + 1);
+                iBilibiliMagicMarketGoodsService.save(magicMarketGoods);
+
+                for (BilibiliMagicMarketRule bilibiliMagicMarketRule : bilibiliMagicMarketRuleList) {
+                    if (bilibiliMagicMarketRule.getSkuId().equals(magicMarketGoods.getSkuId()) && bilibiliMagicMarketRule.getThresholdValue() >= magicMarketGoods.getPrice()) {
+                        String topic = iSystemConfigService.getSystemConfigValueByConfigName("Bilibili市集商品监控MQ消息主题");
+                        String message = "监控成功！商品：[" + magicMarketGoods.getName() + "]，" + "价格：[" + (magicMarketGoods.getShowPrice() / 100) + "元]" + "，阈值：[" + (bilibiliMagicMarketRule.getThresholdValue() / 100) + "元]，较阈值便宜：[" + ((bilibiliMagicMarketRule.getThresholdValue() - magicMarketGoods.getPrice()) / 100) + "元]。";
+                        // 暂时注释MQ消息发送
+                        // iRocketMQService.sendRocketMQMessage(topic, message);
+                        String text = "商品：" + name + "；价格：" + showPrice + "元；阈值：" + (bilibiliMagicMarketRule.getThresholdValue() / 100) + "元；c2cItemsId：" + c2cItemsId;
+                        // 邮件通知
+                        iMailService.sendSimpleMail("[市集监控]" + name + "监控成功！", text, "704825080@qq.com");
+                        logger.info(message);
+                    }
+                }
+
                 logger.info(c2cItemsName);
             }
         }
