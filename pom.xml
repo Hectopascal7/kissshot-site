@@ -25,6 +25,7 @@
         <module>kissshot-rest</module>
 
         <module>kissshot-mq</module>
+        <module>kissshot-consumer</module>
         <module>kissshot-mail</module>
         <module>kissshot-sms</module>
 
