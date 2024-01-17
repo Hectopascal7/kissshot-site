@@ -1,7 +1,6 @@
-package cn.com.kissshot.entity.bilibili.magicmarket.good;
+package cn.com.kissshot.entity.bilibili.magicmarket.goods;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -10,7 +9,7 @@ import java.util.Date;
 
 @Data
 @TableName("bilibili_magicmarket_goods")
-public class BilibiliMagicMarketGood {
+public class BilibiliMagicMarketGoods {
 
     @TableId(type = IdType.AUTO)
     private Long id;
