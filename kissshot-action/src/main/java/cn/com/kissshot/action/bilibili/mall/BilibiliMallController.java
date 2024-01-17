@@ -1,8 +1,8 @@
 package cn.com.kissshot.action.bilibili.mall;
 
-import cn.com.kissshot.api.bilibili.magicmarket.good.IBilibiliMagicMarketGoodService;
+import cn.com.kissshot.api.bilibili.magicmarket.goods.IBilibiliMagicMarketGoodsService;
 import cn.com.kissshot.api.system.systemconfig.ISystemConfigService;
-import cn.com.kissshot.entity.bilibili.magicmarket.good.BilibiliMagicMarketGood;
+import cn.com.kissshot.entity.bilibili.magicmarket.goods.BilibiliMagicMarketGoods;
 import cn.com.kissshot.entity.system.systemconfig.SystemConfig;
 import cn.com.kissshot.util.date.KissshotDateUtil;
 import cn.com.kissshot.util.date.constant.KissshotDateConstant;
@@ -33,7 +33,7 @@ public class BilibiliMallController {
     public RestTemplate restTemplate;
 
     @Autowired
-    public IBilibiliMagicMarketGoodService iBilibiliMagicMarketGoodService;
+    public IBilibiliMagicMarketGoodsService iBilibiliMagicMarketGoodsService;
 
     @Autowired
     public ISystemConfigService iSystemConfigService;
@@ -45,7 +45,7 @@ public class BilibiliMallController {
     @GetMapping("/getMagicMarketGoods")
     public JSONObject getMagicMarketGoods() throws InterruptedException {
         Integer code;
-        batch = iBilibiliMagicMarketGoodService.getMaxBatch(KissshotDateUtil.convertDateToString(new Date(), KissshotDateConstant.YYYY_MM_DD));
+        batch = iBilibiliMagicMarketGoodsService.getMaxBatch(KissshotDateUtil.convertDateToString(new Date(), KissshotDateConstant.YYYY_MM_DD));
         JSONObject rtnObj = queryMagicMaketGoods(null);
         if (null != rtnObj) {
             code = rtnObj.getInteger("code");
@@ -129,7 +129,7 @@ public class BilibiliMallController {
         for (int i = 0; i < dataArr.size(); i++) {
             JSONObject figure = dataArr.getJSONObject(i);
             if (null != figure) {
-                BilibiliMagicMarketGood magicMarketGood = new BilibiliMagicMarketGood();
+                BilibiliMagicMarketGoods magicMarketGood = new BilibiliMagicMarketGoods();
                 Long c2cItemsId = figure.getLong("c2cItemsId");
                 magicMarketGood.setC2cItemsId(c2cItemsId);
                 Integer type = figure.getInteger("type");
@@ -181,7 +181,7 @@ public class BilibiliMallController {
                 magicMarketGood.setInsertTime(new Date());
 
                 magicMarketGood.setBatch(batch + 1);
-                iBilibiliMagicMarketGoodService.save(magicMarketGood);
+                iBilibiliMagicMarketGoodsService.save(magicMarketGood);
                 logger.info(c2cItemsName);
             }
         }
