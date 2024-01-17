@@ -1,7 +1,7 @@
 package cn.com.kissshot.rest.bilibili.mall;
 
-import cn.com.kissshot.api.bilibili.magicmarket.good.IBilibiliMagicMarketGoodService;
-import cn.com.kissshot.entity.bilibili.magicmarket.good.BilibiliMagicMarketGood;
+import cn.com.kissshot.api.bilibili.magicmarket.goods.IBilibiliMagicMarketGoodsService;
+import cn.com.kissshot.entity.bilibili.magicmarket.goods.BilibiliMagicMarketGoods;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,28 +15,28 @@ import java.util.List;
 public class BilibiliMagicMarketGoodsRest {
 
     @Autowired
-    private IBilibiliMagicMarketGoodService iBilibiliMagicMarketGoodService;
+    private IBilibiliMagicMarketGoodsService iBilibiliMagicMarketGoodsService;
 
     @CrossOrigin
     @PostMapping("/queryBilibiliMagicMarketGoodsData")
     public JSONObject queryBilibiliMagicMarketGoodsData() {
-        List<BilibiliMagicMarketGood> bilibiliMagicMarketGoodList = iBilibiliMagicMarketGoodService.getMagicMarketGoodsList();
+        List<BilibiliMagicMarketGoods> bilibiliMagicMarketGoodsList = iBilibiliMagicMarketGoodsService.getMagicMarketGoodsList();
         JSONArray figureArray = new JSONArray();
-        if (CollectionUtils.isNotEmpty(bilibiliMagicMarketGoodList)) {
-            for (BilibiliMagicMarketGood bilibiliMagicMarketGood : bilibiliMagicMarketGoodList) {
+        if (CollectionUtils.isNotEmpty(bilibiliMagicMarketGoodsList)) {
+            for (BilibiliMagicMarketGoods bilibiliMagicMarketGoods : bilibiliMagicMarketGoodsList) {
                 JSONObject figure = new JSONObject();
-                figure.put("id", bilibiliMagicMarketGood.getId());
-                figure.put("owner", bilibiliMagicMarketGood.getUname());
-                figure.put("title", bilibiliMagicMarketGood.getC2cItemsName());
-                figure.put("cover", "https:" + bilibiliMagicMarketGood.getImg());
-                figure.put("avatar", bilibiliMagicMarketGood.getUface());
-                figure.put("subDescription", bilibiliMagicMarketGood.getName());
-                figure.put("createdAt", bilibiliMagicMarketGood.getInsertTime());
+                figure.put("id", bilibiliMagicMarketGoods.getId());
+                figure.put("owner", bilibiliMagicMarketGoods.getUname());
+                figure.put("title", bilibiliMagicMarketGoods.getC2cItemsName());
+                figure.put("cover", "https:" + bilibiliMagicMarketGoods.getImg());
+                figure.put("avatar", bilibiliMagicMarketGoods.getUface());
+                figure.put("subDescription", bilibiliMagicMarketGoods.getName());
+                figure.put("createdAt", bilibiliMagicMarketGoods.getInsertTime());
                 JSONArray memberArray = new JSONArray();
                 JSONObject member = new JSONObject();
-                member.put("id", bilibiliMagicMarketGood.getUid());
-                member.put("name", bilibiliMagicMarketGood.getUname());
-                member.put("avatar", bilibiliMagicMarketGood.getUface());
+                member.put("id", bilibiliMagicMarketGoods.getUid());
+                member.put("name", bilibiliMagicMarketGoods.getUname());
+                member.put("avatar", bilibiliMagicMarketGoods.getUface());
                 memberArray.add(member);
                 figure.put("members", memberArray);
                 figureArray.add(figure);
