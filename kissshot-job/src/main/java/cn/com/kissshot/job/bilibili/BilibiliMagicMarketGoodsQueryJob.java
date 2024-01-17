@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +41,10 @@ public class BilibiliMagicMarketGoodsQueryJob {
 
     private final Logger logger = LoggerFactory.getLogger(BilibiliMagicMarketGoodsQueryJob.class);
 
-    @Scheduled(cron = "00 27 16 ? * *")
+    /**
+     * 每3小时执行1次，0时、12时全量执行，其余时间只搜索前1000条
+     */
+    @Scheduled(cron = "00 00 0/4 ? * *")
     public void executeQuery() {
         logger.info("==========哔哩哔哩市集商品获取作业开始！==========");
         String url = iSystemConfigService.getSystemConfigValueByConfigName("Bilibili市集商品列表接口地址");
@@ -56,17 +60,26 @@ public class BilibiliMagicMarketGoodsQueryJob {
         headers.put("Cookie", cookieList);
         // 获取批次号
         Integer batch = iBilibiliMagicMarketGoodService.getMaxBatch(KissshotDateUtil.convertDateToString(new Date(), KissshotDateConstant.YYYY_MM_DD));
+        LocalDateTime now = LocalDateTime.now();
+        int hour = now.getHour();
+        int sign = 100;
+        if (hour % 12 == 0) {
+            sign = -1;
+        }
         // 首次调用,nextId为空
-        queryMagicMarketGoods(url, headers, null, batch);
+        queryMagicMarketGoods(url, headers, null, batch, sign);
         logger.info("==========哔哩哔哩市集商品获取作业结束！==========");
     }
 
-    public void queryMagicMarketGoods(String url, HttpHeaders headers, String nextId, Integer batch) {
+    public void queryMagicMarketGoods(String url, HttpHeaders headers, String nextId, Integer batch, Integer sign) {
+        if (sign == 0) {
+            return;
+        }
         JSONObject body = new JSONObject();
         if (StringUtils.isNotBlank(nextId)) {
             body.put("nextId", nextId);
         }
-        if (batch % 2 != 0) {
+        if (batch % 2 == 0) {
             body.put("categoryFilter", iSystemConfigService.getSystemConfigByConfigName("Bilibili市集商品列表接口手办类目").getConfigValue());
         } else {
             body.put("categoryFilter", iSystemConfigService.getSystemConfigByConfigName("Bilibili市集商品列表接口周边类目").getConfigValue());
@@ -80,6 +93,9 @@ public class BilibiliMagicMarketGoodsQueryJob {
         sendMonitor();
 
         JSONObject rtnObj = restTemplate.postForEntity(url, request, JSONObject.class).getBody();
+
+        sign--;
+
         if (null != rtnObj) {
             logger.info("[返回值]:" + rtnObj.toJSONString());
             Integer code = rtnObj.getInteger("code");
@@ -93,15 +109,17 @@ public class BilibiliMagicMarketGoodsQueryJob {
                     } else {
                         logger.error("错误！空数据，dataArr为空！");
                     }
+                    // 非首次调用，nextId不为空才可以继续调用
                     if (StringUtils.isNotBlank(nextId)) {
-                        int mSeconds = 5000 + (int) (Math.random() * (6000 - 5000 + 1));
+                        int mSeconds = 8000 + (int) (Math.random() * (10000 - 8000 + 1));
                         try {
                             Thread.sleep(mSeconds);
                         } catch (InterruptedException e) {
                             logger.error("错误，线程等待出现异常！");
                         }
+
                         // 非首次调用，nextId不为空才可以继续调用
-                        queryMagicMarketGoods(url, headers, nextId, batch);
+                        queryMagicMarketGoods(url, headers, nextId, batch, sign);
                     } else {
                         logger.info("已至末尾，任务结束！");
                     }
@@ -127,7 +145,7 @@ public class BilibiliMagicMarketGoodsQueryJob {
                 magicMarketGood.setC2cItemsId(c2cItemsId);
                 Integer type = figure.getInteger("type");
                 magicMarketGood.setType(type);
-                String c2cItemsName = figure.getString("c2cItemsName");
+                String c2cItemsName = StringUtils.trim(figure.getString("c2cItemsName"));
                 magicMarketGood.setC2cItemsName(c2cItemsName);
                 JSONArray detailDtoList = figure.getJSONArray("detailDtoList");
                 JSONObject detail = detailDtoList.getJSONObject(0);
@@ -137,7 +155,7 @@ public class BilibiliMagicMarketGoodsQueryJob {
                 magicMarketGood.setItemsId(itemsId);
                 Long skuId = detail.getLong("skuId");
                 magicMarketGood.setSkuId(skuId);
-                String name = detail.getString("name");
+                String name = StringUtils.trim(detail.getString("name"));
                 magicMarketGood.setName(name);
                 String img = detail.getString("img");
                 magicMarketGood.setImg(img);
