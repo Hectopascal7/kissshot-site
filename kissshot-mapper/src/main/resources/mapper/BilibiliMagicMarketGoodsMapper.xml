@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.com.kissshot.mapper.bilibili.magicmarket.good.BilibiliMagicMarketGoodMapper">
+<mapper namespace="cn.com.kissshot.mapper.bilibili.magicmarket.good.BilibiliMagicMarketGoodsMapper">
 
-    <resultMap id="sku_good" type="cn.com.kissshot.entity.bilibili.magicmarket.good.BilibiliMagicMarketGood">
+    <resultMap id="sku_good" type="cn.com.kissshot.entity.bilibili.magicmarket.goods.BilibiliMagicMarketGoods">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
     </resultMap>
 
-    <select id="getGoodListBySkuId" resultMap="sku_good">
+    <select id="getGoodsListBySkuId" resultMap="sku_good">
         select *
         from bilibili_magicmarket_goods
         where skuId = #{skuId}
