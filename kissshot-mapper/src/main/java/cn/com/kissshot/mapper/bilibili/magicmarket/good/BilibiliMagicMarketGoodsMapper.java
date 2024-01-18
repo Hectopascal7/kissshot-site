@@ -15,6 +15,7 @@ public interface BilibiliMagicMarketGoodsMapper extends BaseMapper<BilibiliMagic
     @Select("select IFNULL(MAX(batch),0) from bilibili_magicmarket_goods where DATE_FORMAT(inserttime,'%Y-%m-%d') = #{date}")
     Integer getMaxBatch(@Param("date") String date);
 
+    @Select("select * from bilibili_magicmarket_goods where skuId = #{skuId}")
     List<BilibiliMagicMarketGoods> getMagicMarketGoodsListBySkuId(@Param("skuId") String skuId);
 
     @Select("select * from bilibili_magicmarket_goods order by insertTime desc limit 10")
